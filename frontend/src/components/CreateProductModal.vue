@@ -36,10 +36,19 @@ const productToAdd = ref<ProductItem>({
   categories: [],
 })
 
+const wasValidated = ref<boolean>(false)
+const nameError = ref<boolean>(false)
+
 function handleSubmit() {
-  emit('addProduct', { ...productToAdd.value })
-  handleClose()
+  wasValidated.value = true
+  if (productToAdd.value.name.trim().length > 0) {
+    emit('addProduct', { ...productToAdd.value })
+    handleClose()
+  } else {
+    nameError.value = true
+  }
 }
+
 function handleClose() {
   productToAdd.value.id = crypto.randomUUID()
   productToAdd.value.name = ''
@@ -50,6 +59,8 @@ function handleClose() {
   productToAdd.value.weight = 0
   productToAdd.value.shops = []
   productToAdd.value.categories = []
+  wasValidated.value = false
+  nameError.value = false
 
   emit('close')
 }
@@ -78,6 +89,8 @@ function fixNumberInput(event: { target: { value: string } }) {
               placeholder="Product Name"
               v-model="productToAdd.name"
               required
+              :invalid="nameError"
+              feedback-invalid="Product name cannot be empty"
             />
           </CCol>
         </CRow>
