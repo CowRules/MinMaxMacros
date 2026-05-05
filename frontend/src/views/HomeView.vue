@@ -1,38 +1,70 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { type ProductItem, ShopName } from '@/types.ts'
+import { computed, ref } from 'vue'
+import { type ProductItem } from '@/types.ts'
 import ProductList from '@/components/ProductList.vue'
+import { CButton } from '@coreui/vue'
+import CreateProductModal from '@/components/CreateProductModal.vue'
 
-const listings = ref<ProductItem[]>([
-  {
-    id: '123',
-    name: 'Lašiša',
-    price: 5,
-    categories: ['Žuvis'],
-    calories: 150,
-    protein: 18,
-    fiber: 3,
-    shops: [ShopName.Maxima, ShopName.Rimi],
-  },
-  {
-    id: '555',
-    name: 'Varškė',
-    price: 1,
-    categories: ['Varškė'],
-    calories: 80,
-    protein: 16.8,
-    fiber: 1,
-    shops: [ShopName.Iki],
-  },
-])
+const listings = ref<ProductItem[]>([])
+const visible = ref<boolean>(false)
+
+const existingShops = computed(() => {
+  return new Set(
+    listings.value.flatMap((listing) => {
+      return listing.shops
+    }),
+  )
+})
+
+const existingCategories = computed(() => {
+  return new Set(
+    listings.value.flatMap((listing) => {
+      return listing.categories
+    }),
+  )
+})
+
+function handleClose(): void {
+  visible.value = false
+}
+
+function handleNewProduct(newProduct: ProductItem): void {
+  listings.value.push(newProduct)
+}
 </script>
 
 <template>
   <main>
     <div class="container px-lg-5">
-      <h1 class="my-5">Welcome to MinMax Macros</h1>
-      <ProductList v-if="listings.length>0" :products="listings" />
-      <h2 v-else>No products found</h2>
+      <CreateProductModal
+        :visible="visible"
+        :shops="existingShops"
+        :categories="existingCategories"
+        @close="handleClose"
+        @add-product="handleNewProduct"
+      />
+      <h1>Welcome to MinMax Macros</h1>
+      <h2 v-if="listings.length === 0" class="my-5">No products found</h2>
+      <div
+        class="d-flex mb-2"
+        :class="{
+          'justify-content-end': listings.length > 0,
+          'justify-content-center': listings.length === 0,
+        }"
+      >
+        <CButton
+          color="primary"
+          class="mx-3"
+          @click="
+            () => {
+              visible = true
+            }
+          "
+        >
+          Add product
+        </CButton>
+      </div>
+      <ProductList v-if="listings.length > 0" :products="listings" />
     </div>
   </main>
 </template>
