@@ -2,15 +2,45 @@
 import { computed, ref } from 'vue'
 import { type ProductItem } from '@/types.ts'
 import ProductList from '@/components/ProductList.vue'
-import { CButton } from '@coreui/vue'
+import { CButton, CFormInput, CFormLabel, CInputGroup, CInputGroupText } from '@coreui/vue'
 import CreateProductModal from '@/components/CreateProductModal.vue'
 
-const listings = ref<ProductItem[]>([])
+const fullListing = ref<ProductItem[]>([
+  {
+    id: '123',
+    name: 'Lašiša',
+    price: 5,
+    weight: 100,
+    categories: ['Žuvis'],
+    calories: 150,
+    protein: 18,
+    fiber: 3,
+    shops: ['Maxima', 'Rimi'],
+  },
+  {
+    id: '555',
+    name: 'Varškė',
+    price: 1,
+    weight: 180,
+    categories: ['Varškė'],
+    calories: 80,
+    protein: 16.8,
+    fiber: 1,
+    shops: ['Iki', 'Rimi'],
+  },
+])
+const filteredListing = computed(() => {
+  return fullListing.value.filter((item: ProductItem) => {
+    return item.name.toLowerCase().includes(searchInput.value.toLowerCase())
+  })
+})
 const visible = ref<boolean>(false)
+
+const searchInput = ref<string>('')
 
 const existingShops = computed(() => {
   return new Set(
-    listings.value.flatMap((listing) => {
+    fullListing.value.flatMap((listing) => {
       return listing.shops
     }),
   )
@@ -18,7 +48,7 @@ const existingShops = computed(() => {
 
 const existingCategories = computed(() => {
   return new Set(
-    listings.value.flatMap((listing) => {
+    fullListing.value.flatMap((listing) => {
       return listing.categories
     }),
   )
@@ -29,7 +59,7 @@ function handleClose(): void {
 }
 
 function handleNewProduct(newProduct: ProductItem): void {
-  listings.value.push(newProduct)
+  fullListing.value.push(newProduct)
 }
 </script>
 
@@ -44,14 +74,18 @@ function handleNewProduct(newProduct: ProductItem): void {
         @add-product="handleNewProduct"
       />
       <h1>Welcome to MinMax Macros</h1>
-      <h2 v-if="listings.length === 0" class="my-5">No products found</h2>
+
       <div
-        class="d-flex mb-2"
+        class="d-flex mt-5 mb-2"
         :class="{
-          'justify-content-end': listings.length > 0,
-          'justify-content-center': listings.length === 0,
+          'justify-content-between': filteredListing.length > 0,
+          'justify-content-center': filteredListing.length === 0,
         }"
       >
+        <CInputGroup class="w-25">
+          <CInputGroupText><span class="pi pi-search"></span></CInputGroupText>
+          <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
+        </CInputGroup>
         <CButton
           color="primary"
           class="mx-3"
@@ -64,7 +98,8 @@ function handleNewProduct(newProduct: ProductItem): void {
           Add product
         </CButton>
       </div>
-      <ProductList v-if="listings.length > 0" :products="listings" />
+      <h2 v-if="filteredListing.length === 0" class="my-5">No products found</h2>
+      <ProductList v-if="filteredListing.length > 0" :products="filteredListing" />
     </div>
   </main>
 </template>

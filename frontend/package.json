@@ -15,6 +15,7 @@
     "@coreui/coreui": "^5.6.1",
     "@coreui/vue": "^5.8.0",
     "bootstrap": "^5.3.8",
+    "primeicons": "^7.0.0",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },
