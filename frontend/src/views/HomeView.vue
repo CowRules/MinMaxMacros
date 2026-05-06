@@ -5,8 +5,13 @@ import ProductList from '@/components/ProductList.vue'
 import {
   CButton,
   CContainer,
+  CDropdown,
+  CDropdownHeader,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
+  CFormCheck,
   CFormInput,
-  CFormLabel,
   CInputGroup,
   CInputGroupText,
 } from '@coreui/vue'
@@ -38,31 +43,41 @@ const fullListing = ref<ProductItem[]>([
 ])
 const filteredListing = computed(() => {
   return fullListing.value.filter((item: ProductItem) => {
-    return item.name.toLowerCase().includes(searchInput.value.toLowerCase())
+    return (
+      item.name.toLowerCase().includes(searchInput.value.toLowerCase()) &&
+      (activeFilters.value.length === 0 ||
+        item.categories.some((category) => activeFilters.value.includes(category)))
+    )
   })
 })
-const visible = ref<boolean>(false)
+const visibleModal = ref<boolean>(false)
 
 const searchInput = ref<string>('')
 
 const existingShops = computed(() => {
   return new Set(
-    fullListing.value.flatMap((listing) => {
-      return listing.shops
-    }),
+    fullListing.value
+      .flatMap((listing) => {
+        return listing.shops
+      })
+      .sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
   )
 })
 
 const existingCategories = computed(() => {
   return new Set(
-    fullListing.value.flatMap((listing) => {
-      return listing.categories
-    }),
+    fullListing.value
+      .flatMap((listing) => {
+        return listing.categories
+      })
+      .sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
   )
 })
 
+const activeFilters = ref<string[]>([])
+
 function handleClose(): void {
-  visible.value = false
+  visibleModal.value = false
 }
 
 function handleNewProduct(newProduct: ProductItem): void {
@@ -74,7 +89,7 @@ function handleNewProduct(newProduct: ProductItem): void {
   <main>
     <CContainer class="px-lg-5">
       <CreateProductModal
-        :visible="visible"
+        :visible="visibleModal"
         :shops="existingShops"
         :categories="existingCategories"
         @close="handleClose"
@@ -89,16 +104,46 @@ function handleNewProduct(newProduct: ProductItem): void {
           'justify-content-center': filteredListing.length === 0,
         }"
       >
-        <CInputGroup class="w-25">
+        <CInputGroup class="w-25 me-2">
           <CInputGroupText><span class="pi pi-search"></span></CInputGroupText>
           <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
         </CInputGroup>
+        <CDropdown auto-close="outside" :class="{ 'me-auto': filteredListing.length > 0 }">
+          <CDropdownToggle :color="activeFilters.length > 0 ? 'warning' : 'secondary'">
+            <span
+              v-if="activeFilters.length > 0"
+              class="pi pi-filter"
+              style="font-size: 0.8rem"
+            ></span>
+            <span v-else class="pi pi-filter-slash" style="font-size: 0.8rem"></span>
+            Filter
+          </CDropdownToggle>
+          <CDropdownMenu>
+            <CDropdownHeader class="text-center">
+              <CButton color="link" class="p-0" size="sm" @click="() => (activeFilters = [])"
+                >Clear all filters</CButton
+              >
+            </CDropdownHeader>
+            <CDropdownItem
+              class="py-0 px-1"
+              v-for="category in existingCategories"
+              :key="category + '_filter'"
+            >
+              <CFormCheck
+                hit-area="full"
+                :value="category"
+                :label="category"
+                v-model="activeFilters"
+              />
+            </CDropdownItem>
+          </CDropdownMenu>
+        </CDropdown>
         <CButton
           color="primary"
           class="mx-3"
           @click="
             () => {
-              visible = true
+              visibleModal = true
             }
           "
         >
