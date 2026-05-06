@@ -13,6 +13,7 @@ import {
   CTableHeaderCell,
   CTableRow,
 } from '@coreui/vue'
+import DropdownList from '@/components/DropdownList.vue'
 
 const props = defineProps<{
   products: ProductItem[]
@@ -50,45 +51,14 @@ const props = defineProps<{
         <CTableDataCell>{{ product.price }}</CTableDataCell>
         <CTableDataCell>{{ product.weight }}</CTableDataCell>
         <CTableDataCell>
-          <CDropdown>
-            <CDropdownToggle size="sm"></CDropdownToggle>
-            <CDropdownMenu>
-              <CDropdownItem
-                class="no-hover"
-                v-for="(shop, index) in product.shops"
-                :key="product.id + '_' + shop"
-              >
-                <p class="text-center pb-0 mb-0">{{ shop }}</p>
-                <CDropdownDivider v-if="index !== product.shops.length - 1" />
-              </CDropdownItem>
-            </CDropdownMenu>
-          </CDropdown>
+          <DropdownList :items="product.shops" />
         </CTableDataCell>
         <CTableDataCell>
-          <CDropdown>
-            <CDropdownToggle size="sm"></CDropdownToggle>
-            <CDropdownMenu>
-              <CDropdownItem
-                class="no-hover"
-                v-for="(category, index) in product.categories"
-                :key="product.id + '_' + index"
-              >
-                <p class="text-center pb-0 mb-0">{{ category }}</p>
-                <CDropdownDivider v-if="index !== product.categories.length - 1" />
-              </CDropdownItem>
-            </CDropdownMenu>
-          </CDropdown>
+          <DropdownList :items="product.categories" />
         </CTableDataCell>
       </CTableRow>
     </CTableBody>
   </CTable>
 </template>
 
-<style scoped>
-.no-hover:hover,
-.no-hover:focus,
-.no-hover:active{
-  background-color: transparent;
-  color: inherit;
-}
-</style>
+<style scoped></style>
