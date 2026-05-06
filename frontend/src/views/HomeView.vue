@@ -2,7 +2,14 @@
 import { computed, ref } from 'vue'
 import { type ProductItem } from '@/types.ts'
 import ProductList from '@/components/ProductList.vue'
-import { CButton, CFormInput, CFormLabel, CInputGroup, CInputGroupText } from '@coreui/vue'
+import {
+  CButton,
+  CContainer,
+  CFormInput,
+  CFormLabel,
+  CInputGroup,
+  CInputGroupText,
+} from '@coreui/vue'
 import CreateProductModal from '@/components/CreateProductModal.vue'
 
 const fullListing = ref<ProductItem[]>([
@@ -65,7 +72,7 @@ function handleNewProduct(newProduct: ProductItem): void {
 
 <template>
   <main>
-    <div class="container px-lg-5">
+    <CContainer class="px-lg-5">
       <CreateProductModal
         :visible="visible"
         :shops="existingShops"
@@ -100,6 +107,6 @@ function handleNewProduct(newProduct: ProductItem): void {
       </div>
       <h2 v-if="filteredListing.length === 0" class="my-5">No products found</h2>
       <ProductList v-if="filteredListing.length > 0" :products="filteredListing" />
-    </div>
+    </CContainer>
   </main>
 </template>

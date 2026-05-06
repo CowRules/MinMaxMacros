@@ -1,5 +1,18 @@
 <script setup lang="ts">
 import type { ProductItem } from '@/types.ts'
+import {
+  CDropdown,
+  CDropdownDivider,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
+  CTable,
+  CTableBody,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
+} from '@coreui/vue'
 
 const props = defineProps<{
   products: ProductItem[]
@@ -7,66 +20,75 @@ const props = defineProps<{
 </script>
 
 <template>
-  <table class="table table-striped table-hover table-sm table-secondary table-bordered">
-    <thead>
-      <tr class="table-info">
-        <th scope="col">Product</th>
-        <th scope="col">Calories(per 100g)</th>
-        <th scope="col">Protein(per 100g)</th>
-        <th scope="col">Protein/Calories</th>
-        <th scope="col">Fiber(per 100g)</th>
-        <th scope="col">Price</th>
-        <th scope="col">Weight</th>
-        <th scope="col">Shops</th>
-        <th scope="col">Categories</th>
-      </tr>
-    </thead>
-    <tbody class="table-group-divider">
-      <tr v-for="product in products" :key="product.id">
-        <th scope="row">{{ product.name }}</th>
-        <td>{{ product.calories }}</td>
-        <td>{{ product.protein }}</td>
-        <td>
+  <CTable striped hover bordered color="secondary" small>
+    <CTableHead>
+      <CTableRow color="info">
+        <CTableHeaderCell scope="col">Product</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Calories(per 100g)</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Protein(per 100g)</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Protein/Calories</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Fiber(per 100g)</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Price</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Weight</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Shops</CTableHeaderCell>
+        <CTableHeaderCell scope="col">Categories</CTableHeaderCell>
+      </CTableRow>
+    </CTableHead>
+    <CTableBody class="table-group-divider">
+      <CTableRow v-for="product in products" :key="product.id">
+        <CTableHeaderCell scope="row">{{ product.name }}</CTableHeaderCell>
+        <CTableDataCell>{{ product.calories }}</CTableDataCell>
+        <CTableDataCell>{{ product.protein }}</CTableDataCell>
+        <CTableDataCell>
           {{
             product.protein === 0 || product.calories === 0
               ? '-'
               : (product.protein / product.calories).toFixed(2)
           }}
-        </td>
-        <td>{{ product.fiber }}</td>
-        <td>{{ product.price }}</td>
-        <td>{{ product.weight }}</td>
-        <td class="dropdown">
-          <button
-            class="btn btn-sm dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          ></button>
-          <ul class="dropdown-menu">
-            <li v-for="(shop, index) in product.shops" :key="product.id + '_' + shop">
-              <p class="text-center pb-0 mb-0">{{ shop }}</p>
-              <hr class="dropdown-divider" v-if="index !== product.shops.length - 1" />
-            </li>
-          </ul>
-        </td>
-        <td class="dropdown">
-          <button
-            class="btn btn-sm dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          ></button>
-          <ul class="dropdown-menu">
-            <li v-for="(category, index) in product.categories" :key="product.id + '_' + category">
-              <p class="text-center pb-0 mb-0">{{ category }}</p>
-              <hr class="dropdown-divider" v-if="index !== product.categories.length - 1" />
-            </li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </CTableDataCell>
+        <CTableDataCell>{{ product.fiber }}</CTableDataCell>
+        <CTableDataCell>{{ product.price }}</CTableDataCell>
+        <CTableDataCell>{{ product.weight }}</CTableDataCell>
+        <CTableDataCell>
+          <CDropdown>
+            <CDropdownToggle size="sm"></CDropdownToggle>
+            <CDropdownMenu>
+              <CDropdownItem
+                class="no-hover"
+                v-for="(shop, index) in product.shops"
+                :key="product.id + '_' + shop"
+              >
+                <p class="text-center pb-0 mb-0">{{ shop }}</p>
+                <CDropdownDivider v-if="index !== product.shops.length - 1" />
+              </CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
+        </CTableDataCell>
+        <CTableDataCell>
+          <CDropdown>
+            <CDropdownToggle size="sm"></CDropdownToggle>
+            <CDropdownMenu>
+              <CDropdownItem
+                class="no-hover"
+                v-for="(category, index) in product.categories"
+                :key="product.id + '_' + index"
+              >
+                <p class="text-center pb-0 mb-0">{{ category }}</p>
+                <CDropdownDivider v-if="index !== product.categories.length - 1" />
+              </CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
+        </CTableDataCell>
+      </CTableRow>
+    </CTableBody>
+  </CTable>
 </template>
 
-<style scoped></style>
+<style scoped>
+.no-hover:hover,
+.no-hover:focus,
+.no-hover:active{
+  background-color: transparent;
+  color: inherit;
+}
+</style>

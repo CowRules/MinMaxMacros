@@ -1,38 +1,37 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import {
+  CCollapse,
+  CContainer,
+  CNavbar,
+  CNavbarBrand,
+  CNavbarNav,
+  CNavbarToggler,
+  CNavItem,
+} from '@coreui/vue'
 </script>
 
 <template>
   <header>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-      <div class="container">
-        <div class="navbar-brand">MinMax Macros</div>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#MinMaxMacrosNavbar"
-          aria-controls="MinMaxMacrosNavbar"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="MinMaxMacrosNavbar">
-          <ul class="navbar-nav">
-            <li class="nav-item">
+    <CNavbar expand="sm" color-scheme="dark" class="bg-dark">
+      <CContainer>
+        <CNavbarBrand>MinMax Macros</CNavbarBrand>
+        <CNavbarToggler />
+        <CCollapse class="navbar-collapse">
+          <CNavbarNav>
+            <CNavItem>
               <RouterLink class="nav-link" to="/" active-class="active">Home</RouterLink>
-            </li>
-            <li class="nav-item">
+            </CNavItem>
+            <CNavItem>
               <RouterLink class="nav-link" to="/about" active-class="active">About</RouterLink>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+            </CNavItem>
+          </CNavbarNav>
+        </CCollapse>
+      </CContainer>
+    </CNavbar>
   </header>
 
-  <div class="container text-center mt-5">
+  <CContainer class="text-center mt-5">
     <RouterView />
-  </div>
+  </CContainer>
 </template>
