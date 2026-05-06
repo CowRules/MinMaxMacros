@@ -75,6 +75,38 @@ const existingCategories = computed(() => {
 })
 
 const activeFilters = ref<string[]>([])
+const sortedBy = ref<string>('')
+const sortDirection = ref<string>('')
+
+function handleSort(criteria: string, direction: string) {
+  sortedBy.value = criteria
+  sortDirection.value = direction
+  switch (criteria) {
+    case 'calories':
+      fullListing.value.sort((a, b) => (a.calories > b.calories === (direction === 'asc') ? 1 : -1))
+      break
+    case 'protein':
+      fullListing.value.sort((a, b) => (a.protein > b.protein === (direction === 'asc') ? 1 : -1))
+      break
+    case 'ratio':
+      fullListing.value.sort((a, b) =>
+        a.protein / a.calories > b.protein / b.calories === (direction === 'asc') ? 1 : -1,
+      )
+      break
+    case 'fiber':
+      fullListing.value.sort((a, b) => (a.fiber > b.fiber === (direction === 'asc') ? 1 : -1))
+      break
+    case 'price':
+      fullListing.value.sort((a, b) => (a.price > b.price === (direction === 'asc') ? 1 : -1))
+      break
+    case 'weight':
+      fullListing.value.sort((a, b) => (a.weight > b.weight === (direction === 'asc') ? 1 : -1))
+      break
+    default:
+      fullListing.value.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1))
+      break
+  }
+}
 
 function handleClose(): void {
   visibleModal.value = false
@@ -151,7 +183,13 @@ function handleNewProduct(newProduct: ProductItem): void {
         </CButton>
       </div>
       <h2 v-if="filteredListing.length === 0" class="my-5">No products found</h2>
-      <ProductList v-if="filteredListing.length > 0" :products="filteredListing" />
+      <ProductList
+        v-if="filteredListing.length > 0"
+        :products="filteredListing"
+        :sorted-by
+        :sort-direction
+        @handle-sort="handleSort"
+      />
     </CContainer>
   </main>
 </template>

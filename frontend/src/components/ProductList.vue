@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import type { ProductItem } from '@/types.ts'
 import {
-  CDropdown,
-  CDropdownDivider,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
   CTable,
   CTableBody,
   CTableDataCell,
@@ -14,10 +9,28 @@ import {
   CTableRow,
 } from '@coreui/vue'
 import DropdownList from '@/components/DropdownList.vue'
+import TableHeaderCellSort from '@/components/TableHeaderCellSort.vue'
 
 const props = defineProps<{
   products: ProductItem[]
+  sortedBy: string
+  sortDirection: string
 }>()
+const emit = defineEmits<{
+  handleSort: [criteria: string, direction: string]
+}>()
+
+function handleSort(criteria: string) {
+  if (props.sortedBy === criteria) {
+    if (props.sortDirection === 'desc') {
+      emit('handleSort', criteria, 'asc')
+    } else {
+      emit('handleSort', '', 'desc')
+    }
+  } else {
+    emit('handleSort', criteria, 'desc')
+  }
+}
 </script>
 
 <template>
@@ -25,12 +38,48 @@ const props = defineProps<{
     <CTableHead>
       <CTableRow color="info">
         <CTableHeaderCell scope="col">Product</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Calories(per 100g)</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Protein(per 100g)</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Protein/Calories</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Fiber(per 100g)</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Price</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Weight</CTableHeaderCell>
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Calories(per 100g)"
+          sort-key="calories"
+          @click="handleSort"
+        />
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Protein(per 100g)"
+          sort-key="protein"
+          @click="handleSort"
+        />
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Protein/Calories"
+          sort-key="ratio"
+          @click="handleSort"
+        />
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Fiber(per 100g)"
+          sort-key="fiber"
+          @click="handleSort"
+        />
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Price"
+          sort-key="price"
+          @click="handleSort"
+        />
+        <TableHeaderCellSort
+          :sorted-by
+          :sort-direction
+          text="Weight"
+          sort-key="weight"
+          @click="handleSort"
+        />
         <CTableHeaderCell scope="col">Shops</CTableHeaderCell>
         <CTableHeaderCell scope="col">Categories</CTableHeaderCell>
       </CTableRow>
