@@ -41,6 +41,35 @@ func (q *Queries) GetProductCategories(ctx context.Context) ([]string, error) {
 	return items, nil
 }
 
+const getProductShops = `-- name: GetProductShops :many
+SELECT DISTINCT CAST(unnest(shops) AS TEXT) AS shop
+FROM product
+ORDER BY shop
+`
+
+func (q *Queries) GetProductShops(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getProductShops)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var shop string
+		if err := rows.Scan(&shop); err != nil {
+			return nil, err
+		}
+		items = append(items, shop)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProducts = `-- name: GetProducts :many
 SELECT id, name, calories, protein, fiber, price, weight, categories, shops
 FROM product
