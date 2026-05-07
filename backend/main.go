@@ -52,8 +52,9 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: serveMux,
+		Handler: corsMiddleware(serveMux),
 	}
+
 	fmt.Println("Server starting on port 8080")
 
 	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
