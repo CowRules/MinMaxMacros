@@ -17,8 +17,8 @@ import { type ProductItem } from '@/types.ts'
 import { ref } from 'vue'
 const props = defineProps<{
   visible: boolean
-  shops: Set<string>
-  categories: Set<string>
+  shops: string[]
+  categories: string[]
 }>()
 const emit = defineEmits<{
   close: []

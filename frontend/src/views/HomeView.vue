@@ -23,8 +23,18 @@ const loaded = ref(false)
 
 const fullListing = ref<ProductItem[]>([])
 
+const existingShops = ref<string[]>([])
+
+const existingCategories = ref<string[]>([])
+
 async function fetchData() {
   fullListing.value = await api.get('/api/products').then((res) => {
+    return res.data
+  })
+  existingShops.value = await api.get('/api/products/shops').then((res) => {
+    return res.data
+  })
+  existingCategories.value = await api.get('/api/products/categories').then((res) => {
     return res.data
   })
 }
@@ -46,26 +56,6 @@ const filteredListing = computed(() => {
 const visibleModal = ref<boolean>(false)
 
 const searchInput = ref<string>('')
-
-const existingShops = computed(() => {
-  return new Set(
-    fullListing.value
-      .flatMap((listing) => {
-        return listing.shops
-      })
-      .sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
-  )
-})
-
-const existingCategories = computed(() => {
-  return new Set(
-    fullListing.value
-      .flatMap((listing) => {
-        return listing.categories
-      })
-      .sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1)),
-  )
-})
 
 const activeFilters = ref<string[]>([])
 const sortedBy = ref<string>('')
