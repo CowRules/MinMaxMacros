@@ -12,6 +12,35 @@ import (
 	"github.com/lib/pq"
 )
 
+const getProductCategories = `-- name: GetProductCategories :many
+SELECT DISTINCT CAST(unnest(categories) AS TEXT) AS category
+FROM product
+ORDER BY category
+`
+
+func (q *Queries) GetProductCategories(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getProductCategories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var category string
+		if err := rows.Scan(&category); err != nil {
+			return nil, err
+		}
+		items = append(items, category)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProducts = `-- name: GetProducts :many
 SELECT id, name, calories, protein, fiber, price, weight, categories, shops
 FROM product

@@ -50,6 +50,8 @@ func main() {
 
 	serveMux.HandleFunc("GET /api/products", apiCfg.GetProducts)
 
+	serveMux.HandleFunc("GET /api/products/categories", apiCfg.GetProductCategories)
+
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: corsMiddleware(serveMux),
