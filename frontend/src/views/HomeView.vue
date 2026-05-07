@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { type ProductItem } from '@/types.ts'
 import ProductList from '@/components/ProductList.vue'
 import {
@@ -14,33 +14,26 @@ import {
   CFormInput,
   CInputGroup,
   CInputGroupText,
+  CSpinner,
 } from '@coreui/vue'
 import CreateProductModal from '@/components/CreateProductModal.vue'
+import { api } from '@/api/api.ts'
 
-const fullListing = ref<ProductItem[]>([
-  {
-    id: '123',
-    name: 'Lašiša',
-    price: 5,
-    weight: 100,
-    categories: ['Žuvis'],
-    calories: 150,
-    protein: 18,
-    fiber: 3,
-    shops: ['Maxima', 'Rimi'],
-  },
-  {
-    id: '555',
-    name: 'Varškė',
-    price: 1,
-    weight: 180,
-    categories: ['Varškė'],
-    calories: 80,
-    protein: 16.8,
-    fiber: 1,
-    shops: ['Iki', 'Rimi'],
-  },
-])
+const loaded = ref(false)
+
+const fullListing = ref<ProductItem[]>([])
+
+async function fetchData() {
+  fullListing.value = await api.get('/api/products').then((res) => {
+    return res.data
+  })
+}
+
+onMounted(async () => {
+  await fetchData()
+  loaded.value = true
+})
+
 const filteredListing = computed(() => {
   return fullListing.value.filter((item: ProductItem) => {
     return (
@@ -78,7 +71,7 @@ const activeFilters = ref<string[]>([])
 const sortedBy = ref<string>('')
 const sortDirection = ref<string>('')
 
-function handleSort(criteria: string, direction: string) {
+async function handleSort(criteria: string, direction: string) {
   sortedBy.value = criteria
   sortDirection.value = direction
   switch (criteria) {
@@ -118,78 +111,79 @@ function handleNewProduct(newProduct: ProductItem): void {
 </script>
 
 <template>
-  <main>
-    <CContainer class="px-lg-5">
-      <CreateProductModal
-        :visible="visibleModal"
-        :shops="existingShops"
-        :categories="existingCategories"
-        @close="handleClose"
-        @add-product="handleNewProduct"
-      />
-      <h1>Welcome to MinMax Macros</h1>
+  <CContainer v-if="loaded" class="px-lg-5">
+    <CreateProductModal
+      :visible="visibleModal"
+      :shops="existingShops"
+      :categories="existingCategories"
+      @close="handleClose"
+      @add-product="handleNewProduct"
+    />
+    <h1>Welcome to MinMax Macros</h1>
 
-      <div
-        class="d-flex mt-5 mb-2"
-        :class="{
-          'justify-content-between': filteredListing.length > 0,
-          'justify-content-center': filteredListing.length === 0,
-        }"
-      >
-        <CInputGroup class="w-25 me-2">
-          <CInputGroupText><span class="pi pi-search"></span></CInputGroupText>
-          <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
-        </CInputGroup>
-        <CDropdown auto-close="outside" :class="{ 'me-auto': filteredListing.length > 0 }">
-          <CDropdownToggle :color="activeFilters.length > 0 ? 'warning' : 'secondary'">
-            <span
-              v-if="activeFilters.length > 0"
-              class="pi pi-filter"
-              style="font-size: 0.8rem"
-            ></span>
-            <span v-else class="pi pi-filter-slash" style="font-size: 0.8rem"></span>
-            Filter
-          </CDropdownToggle>
-          <CDropdownMenu>
-            <CDropdownHeader class="text-center">
-              <CButton color="link" class="p-0" size="sm" @click="() => (activeFilters = [])"
-                >Clear all filters</CButton
-              >
-            </CDropdownHeader>
-            <CDropdownItem
-              class="py-0 px-1"
-              v-for="category in existingCategories"
-              :key="category + '_filter'"
+    <div
+      class="d-flex mt-5 mb-2"
+      :class="{
+        'justify-content-between': filteredListing.length > 0,
+        'justify-content-center': filteredListing.length === 0,
+      }"
+    >
+      <CInputGroup class="w-25 me-2">
+        <CInputGroupText><span class="pi pi-search"></span></CInputGroupText>
+        <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
+      </CInputGroup>
+      <CDropdown auto-close="outside" :class="{ 'me-auto': filteredListing.length > 0 }">
+        <CDropdownToggle :color="activeFilters.length > 0 ? 'warning' : 'secondary'">
+          <span
+            v-if="activeFilters.length > 0"
+            class="pi pi-filter"
+            style="font-size: 0.8rem"
+          ></span>
+          <span v-else class="pi pi-filter-slash" style="font-size: 0.8rem"></span>
+          Filter
+        </CDropdownToggle>
+        <CDropdownMenu>
+          <CDropdownHeader class="text-center">
+            <CButton color="link" class="p-0" size="sm" @click="() => (activeFilters = [])"
+              >Clear all filters</CButton
             >
-              <CFormCheck
-                hit-area="full"
-                :value="category"
-                :label="category"
-                v-model="activeFilters"
-              />
-            </CDropdownItem>
-          </CDropdownMenu>
-        </CDropdown>
-        <CButton
-          color="primary"
-          class="mx-3"
-          @click="
-            () => {
-              visibleModal = true
-            }
-          "
-        >
-          Add product
-        </CButton>
-      </div>
-      <h2 v-if="filteredListing.length === 0" class="my-5">No products found</h2>
-      <ProductList
-        v-if="filteredListing.length > 0"
-        :products="filteredListing"
-        :sorted-by
-        :sort-direction
-        @handle-sort="handleSort"
-      />
-    </CContainer>
-  </main>
+          </CDropdownHeader>
+          <CDropdownItem
+            class="py-0 px-1"
+            v-for="category in existingCategories"
+            :key="category + '_filter'"
+          >
+            <CFormCheck
+              hit-area="full"
+              :value="category"
+              :label="category"
+              v-model="activeFilters"
+            />
+          </CDropdownItem>
+        </CDropdownMenu>
+      </CDropdown>
+      <CButton
+        color="primary"
+        class="mx-3"
+        @click="
+          () => {
+            visibleModal = true
+          }
+        "
+      >
+        Add product
+      </CButton>
+    </div>
+    <h2 v-if="filteredListing.length === 0" class="my-5">No products found</h2>
+    <ProductList
+      v-if="filteredListing.length > 0"
+      :products="filteredListing"
+      :sorted-by
+      :sort-direction
+      @handle-sort="handleSort"
+    />
+  </CContainer>
+  <CContainer class="flex-grow-1 align-content-center" v-else>
+    <CSpinner />
+  </CContainer>
 </template>
