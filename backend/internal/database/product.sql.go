@@ -12,6 +12,62 @@ import (
 	"github.com/lib/pq"
 )
 
+const createProduct = `-- name: CreateProduct :one
+INSERT INTO product
+(id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops)
+VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, name, calories, protein, fiber, price, weight, categories, shops
+`
+
+type CreateProductParams struct {
+	Name       string   `json:"name"`
+	Calories   float64  `json:"calories"`
+	Protein    float64  `json:"protein"`
+	Fiber      float64  `json:"fiber"`
+	Price      float64  `json:"price"`
+	Weight     float64  `json:"weight"`
+	Categories []string `json:"categories"`
+	Shops      []string `json:"shops"`
+}
+
+type CreateProductRow struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Calories   float64   `json:"calories"`
+	Protein    float64   `json:"protein"`
+	Fiber      float64   `json:"fiber"`
+	Price      float64   `json:"price"`
+	Weight     float64   `json:"weight"`
+	Categories []string  `json:"categories"`
+	Shops      []string  `json:"shops"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (CreateProductRow, error) {
+	row := q.db.QueryRowContext(ctx, createProduct,
+		arg.Name,
+		arg.Calories,
+		arg.Protein,
+		arg.Fiber,
+		arg.Price,
+		arg.Weight,
+		pq.Array(arg.Categories),
+		pq.Array(arg.Shops),
+	)
+	var i CreateProductRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Calories,
+		&i.Protein,
+		&i.Fiber,
+		&i.Price,
+		&i.Weight,
+		pq.Array(&i.Categories),
+		pq.Array(&i.Shops),
+	)
+	return i, err
+}
+
 const getProductCategories = `-- name: GetProductCategories :many
 SELECT DISTINCT CAST(unnest(categories) AS TEXT) AS category
 FROM product
