@@ -18,6 +18,7 @@ import {
 } from '@coreui/vue'
 import CreateProductModal from '@/components/CreateProductModal.vue'
 import { api } from '@/api/api.ts'
+import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
 
 const loaded = ref(false)
 
@@ -45,6 +46,7 @@ onMounted(async () => {
 })
 
 const filteredListing = computed(() => {
+  handleSort(sortedBy.value, sortDirection.value)
   return fullListing.value.filter((item: ProductItem) => {
     return (
       item.name.toLowerCase().includes(searchInput.value.toLowerCase()) &&
@@ -95,8 +97,12 @@ function handleClose(): void {
   visibleModal.value = false
 }
 
-function handleNewProduct(newProduct: ProductItem): void {
-  fullListing.value.push(newProduct)
+async function handleNewProduct(newProduct: ProductItem) {
+  await api.post('/api/products', newProduct).then((res) => {
+    fullListing.value.push(res.data)
+    existingCategories.value = mergeUniqueSortedStringArrays(existingCategories.value, newProduct.categories)
+    existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, newProduct.shops)
+  })
 }
 </script>
 

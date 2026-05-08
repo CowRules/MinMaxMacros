@@ -25,7 +25,7 @@ const emit = defineEmits<{
   addProduct: [newProduct: ProductItem]
 }>()
 const productToAdd = ref<ProductItem>({
-  id: crypto.randomUUID(),
+  id: '',
   name: '',
   calories: 0,
   protein: 0,
@@ -50,7 +50,6 @@ function handleSubmit() {
 }
 
 function handleClose() {
-  productToAdd.value.id = crypto.randomUUID()
   productToAdd.value.name = ''
   productToAdd.value.calories = 0
   productToAdd.value.protein = 0
@@ -65,12 +64,6 @@ function handleClose() {
   emit('close')
 }
 
-function fixNumberInput(event: { target: { value: string } }) {
-  const value = event.target.value
-  if (value === '') return
-  const fixed = Number(value)
-  event.target.value = fixed.toString()
-}
 </script>
 <template>
   <CModal backdrop="static" :visible="visible" @close="handleClose">
@@ -97,27 +90,25 @@ function fixNumberInput(event: { target: { value: string } }) {
         <CRow>
           <CCol>
             <CFormInput
-              @change="fixNumberInput"
               class="mb-2"
               type="number"
               floatingLabel="Weight"
               placeholder="Weight"
               step="0.01"
               min="0"
-              v-model="productToAdd.weight"
+              v-model.number="productToAdd.weight"
               required
             />
           </CCol>
           <CCol>
             <CFormInput
-              @change="fixNumberInput"
               class="mb-2"
               type="number"
               floatingLabel="Price (€)"
               placeholder="Price (€)"
               step="0.01"
               min="0"
-              v-model="productToAdd.price"
+              v-model.number="productToAdd.price"
               required
             />
           </CCol>
@@ -126,40 +117,37 @@ function fixNumberInput(event: { target: { value: string } }) {
         <CRow>
           <CCol>
             <CFormInput
-              @change="fixNumberInput"
               class="mb-2"
               type="number"
               floatingLabel="Calories (kcal)"
               placeholder="Calories (kcal)"
               step="0.01"
               min="0"
-              v-model="productToAdd.calories"
+              v-model.number="productToAdd.calories"
               required
             />
           </CCol>
           <CCol>
             <CFormInput
-              @change="fixNumberInput"
               class="mb-2"
               type="number"
               floatingLabel="Protein (g)"
               placeholder="Protein (g)"
               step="0.01"
               min="0"
-              v-model="productToAdd.protein"
+              v-model.number="productToAdd.protein"
               required
             />
           </CCol>
           <CCol>
             <CFormInput
-              @change="fixNumberInput"
               class="mb-2"
               type="number"
               floatingLabel="Fiber (g)"
               placeholder="Fiber (g)"
               step="0.01"
               min="0"
-              v-model="productToAdd.fiber"
+              v-model.number="productToAdd.fiber"
               required
             />
           </CCol>
