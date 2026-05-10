@@ -5,12 +5,6 @@ import ProductList from '@/components/ProductList.vue'
 import {
   CButton,
   CContainer,
-  CDropdown,
-  CDropdownHeader,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
-  CFormCheck,
   CFormInput,
   CInputGroup,
   CInputGroupText,
@@ -19,6 +13,7 @@ import {
 import CreateProductModal from '@/components/CreateProductModal.vue'
 import { api } from '@/api/api.ts'
 import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
+import DropdownFilter from '@/components/DropdownFilter.vue'
 
 const loaded = ref(false)
 
@@ -50,8 +45,10 @@ const filteredListing = computed(() => {
   return fullListing.value.filter((item: ProductItem) => {
     return (
       item.name.toLowerCase().includes(searchInput.value.toLowerCase()) &&
-      (activeFilters.value.length === 0 ||
-        item.categories.some((category) => activeFilters.value.includes(category)))
+      (activeCategoryFilters.value.length === 0 ||
+        item.categories.some((category) => activeCategoryFilters.value.includes(category))) &&
+      (activeShopFilters.value.length === 0 ||
+        item.shops.some((shop) => activeShopFilters.value.includes(shop)))
     )
   })
 })
@@ -59,7 +56,8 @@ const visibleModal = ref<boolean>(false)
 
 const searchInput = ref<string>('')
 
-const activeFilters = ref<string[]>([])
+const activeCategoryFilters = ref<string[]>([])
+const activeShopFilters = ref<string[]>([])
 const sortedBy = ref<string>('')
 const sortDirection = ref<string>('')
 
@@ -100,7 +98,10 @@ function handleClose(): void {
 async function handleNewProduct(newProduct: ProductItem) {
   await api.post('/api/products', newProduct).then((res) => {
     fullListing.value.push(res.data)
-    existingCategories.value = mergeUniqueSortedStringArrays(existingCategories.value, newProduct.categories)
+    existingCategories.value = mergeUniqueSortedStringArrays(
+      existingCategories.value,
+      newProduct.categories,
+    )
     existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, newProduct.shops)
   })
 }
@@ -128,36 +129,10 @@ async function handleNewProduct(newProduct: ProductItem) {
         <CInputGroupText><span class="pi pi-search"></span></CInputGroupText>
         <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
       </CInputGroup>
-      <CDropdown auto-close="outside" :class="{ 'me-auto': filteredListing.length > 0 }">
-        <CDropdownToggle :color="activeFilters.length > 0 ? 'warning' : 'secondary'">
-          <span
-            v-if="activeFilters.length > 0"
-            class="pi pi-filter"
-            style="font-size: 0.8rem"
-          ></span>
-          <span v-else class="pi pi-filter-slash" style="font-size: 0.8rem"></span>
-          Filter
-        </CDropdownToggle>
-        <CDropdownMenu>
-          <CDropdownHeader class="text-center">
-            <CButton color="link" class="p-0" size="sm" @click="() => (activeFilters = [])"
-              >Clear all filters</CButton
-            >
-          </CDropdownHeader>
-          <CDropdownItem
-            class="py-0 px-1"
-            v-for="category in existingCategories"
-            :key="category + '_filter'"
-          >
-            <CFormCheck
-              hit-area="full"
-              :value="category"
-              :label="category"
-              v-model="activeFilters"
-            />
-          </CDropdownItem>
-        </CDropdownMenu>
-      </CDropdown>
+      <div :class="{ 'me-auto': filteredListing.length > 0 }">
+        <DropdownFilter label="Category filter" :filter-options="existingCategories" v-model="activeCategoryFilters" />
+        <DropdownFilter label="Shop filter" :filter-options="existingShops" v-model="activeShopFilters" />
+      </div>
       <CButton
         color="primary"
         class="mx-3"
