@@ -11,7 +11,7 @@ import {
   CSpinner,
 } from '@coreui/vue'
 import CreateProductModal from '@/components/CreateProductModal.vue'
-import { api } from '@/api/api.ts'
+import api from '@/api/api.ts'
 import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
 import DropdownFilter from '@/components/DropdownFilter.vue'
 
@@ -25,13 +25,22 @@ const existingCategories = ref<string[]>([])
 
 async function fetchData() {
   fullListing.value = await api.get('/api/products').then((res) => {
-    return res.data
+    if (res.data != null) {
+      return res.data
+    }
+    return []
   })
   existingShops.value = await api.get('/api/products/shops').then((res) => {
-    return res.data
+    if (res.data != null) {
+      return res.data
+    }
+    return []
   })
   existingCategories.value = await api.get('/api/products/categories').then((res) => {
-    return res.data
+    if (res.data != null) {
+      return res.data
+    }
+    return []
   })
 }
 
@@ -130,8 +139,16 @@ async function handleNewProduct(newProduct: ProductItem) {
         <CFormInput type="text" placeholder="Search by name" v-model="searchInput" />
       </CInputGroup>
       <div :class="{ 'me-auto': filteredListing.length > 0 }">
-        <DropdownFilter label="Category filter" :filter-options="existingCategories" v-model="activeCategoryFilters" />
-        <DropdownFilter label="Shop filter" :filter-options="existingShops" v-model="activeShopFilters" />
+        <DropdownFilter
+          label="Category filter"
+          :filter-options="existingCategories"
+          v-model="activeCategoryFilters"
+        />
+        <DropdownFilter
+          label="Shop filter"
+          :filter-options="existingShops"
+          v-model="activeShopFilters"
+        />
       </div>
       <CButton
         color="primary"

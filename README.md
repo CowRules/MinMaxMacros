@@ -38,6 +38,8 @@ go mod download
 
 ```env
 DB_URL=your_postgresql_connection_string?sslmode=disable
+JWT_SECRET=your_jwt_secret
+CORS_ALLOW_ORIGIN=your_frontend_url
 ```
 
 4. From ```backend/sql/schema```, run database migrations:

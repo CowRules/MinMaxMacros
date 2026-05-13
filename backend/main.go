@@ -56,6 +56,14 @@ func main() {
 
 	serveMux.HandleFunc("POST /api/products", apiCfg.CreateProduct)
 
+	serveMux.HandleFunc("POST /auth/register", apiCfg.Register)
+
+	serveMux.HandleFunc("POST /auth/login", apiCfg.Login)
+
+	serveMux.HandleFunc("POST /auth/logout", apiCfg.Logout)
+
+	serveMux.HandleFunc("POST /auth/refresh", apiCfg.Refresh)
+
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: corsMiddleware(serveMux),

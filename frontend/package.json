@@ -14,6 +14,9 @@
   "dependencies": {
     "@coreui/coreui": "^5.6.1",
     "@coreui/vue": "^5.8.0",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
+    "@vueuse/core": "^14.3.0",
     "axios": "^1.16.0",
     "bootstrap": "^5.3.8",
     "primeicons": "^7.0.0",
