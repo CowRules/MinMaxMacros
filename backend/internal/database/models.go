@@ -23,6 +23,7 @@ type Product struct {
 	Fiber      float64   `json:"fiber"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"user_id"`
 }
 
 type RefreshToken struct {

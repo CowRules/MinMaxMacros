@@ -14,6 +14,7 @@ import CreateProductModal from '@/components/CreateProductModal.vue'
 import api from '@/api/api.ts'
 import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
 import DropdownFilter from '@/components/DropdownFilter.vue'
+import { userStorage } from '@/composables/useUserStorage.ts'
 
 const loaded = ref(false)
 
@@ -151,6 +152,7 @@ async function handleNewProduct(newProduct: ProductItem) {
         />
       </div>
       <CButton
+        v-if="userStorage.id"
         color="primary"
         class="mx-3"
         @click="

@@ -8,4 +8,5 @@ export interface ProductItem {
   protein: number
   fiber: number
   shops: string[]
+  user_id: string
 }

@@ -14,20 +14,21 @@ import (
 
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO product
-(id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops)
-VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, name, calories, protein, fiber, price, weight, categories, shops
+(id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops, user_id)
+VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id
 `
 
 type CreateProductParams struct {
-	Name       string   `json:"name"`
-	Calories   float64  `json:"calories"`
-	Protein    float64  `json:"protein"`
-	Fiber      float64  `json:"fiber"`
-	Price      float64  `json:"price"`
-	Weight     float64  `json:"weight"`
-	Categories []string `json:"categories"`
-	Shops      []string `json:"shops"`
+	Name       string    `json:"name"`
+	Calories   float64   `json:"calories"`
+	Protein    float64   `json:"protein"`
+	Fiber      float64   `json:"fiber"`
+	Price      float64   `json:"price"`
+	Weight     float64   `json:"weight"`
+	Categories []string  `json:"categories"`
+	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"user_id"`
 }
 
 type CreateProductRow struct {
@@ -40,6 +41,7 @@ type CreateProductRow struct {
 	Weight     float64   `json:"weight"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (CreateProductRow, error) {
@@ -52,6 +54,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (C
 		arg.Weight,
 		pq.Array(arg.Categories),
 		pq.Array(arg.Shops),
+		arg.UserID,
 	)
 	var i CreateProductRow
 	err := row.Scan(
@@ -64,6 +67,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (C
 		&i.Weight,
 		pq.Array(&i.Categories),
 		pq.Array(&i.Shops),
+		&i.UserID,
 	)
 	return i, err
 }
@@ -127,7 +131,7 @@ func (q *Queries) GetProductShops(ctx context.Context) ([]string, error) {
 }
 
 const getProducts = `-- name: GetProducts :many
-SELECT id, name, calories, protein, fiber, price, weight, categories, shops
+SELECT id, name, calories, protein, fiber, price, weight, categories, shops, user_id
 FROM product
 GROUP BY product.id
 ORDER BY product.name
@@ -143,6 +147,7 @@ type GetProductsRow struct {
 	Weight     float64   `json:"weight"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) GetProducts(ctx context.Context) ([]GetProductsRow, error) {
@@ -164,6 +169,7 @@ func (q *Queries) GetProducts(ctx context.Context) ([]GetProductsRow, error) {
 			&i.Weight,
 			pq.Array(&i.Categories),
 			pq.Array(&i.Shops),
+			&i.UserID,
 		); err != nil {
 			return nil, err
 		}

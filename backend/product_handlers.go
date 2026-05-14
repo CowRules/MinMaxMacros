@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/CowRules/MinMaxMacros/backend/internal/auth"
 	"github.com/CowRules/MinMaxMacros/backend/internal/database"
 )
 
@@ -68,6 +69,11 @@ func (cfg *apiConfig) GetProductShops(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	authenticated, userId, _ := auth.IsAuthenticated(r)
+	if !authenticated {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 	requestBody := database.CreateProductParams{}
@@ -76,6 +82,7 @@ func (cfg *apiConfig) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
+	requestBody.UserID = userId
 	if err := ValidateCreateProduct(requestBody); err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)

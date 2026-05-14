@@ -1,5 +1,5 @@
 -- name: GetProducts :many
-SELECT id, name, calories, protein, fiber, price, weight, categories, shops
+SELECT id, name, calories, protein, fiber, price, weight, categories, shops, user_id
 FROM product
 GROUP BY product.id
 ORDER BY product.name;
@@ -16,6 +16,6 @@ ORDER BY shop;
 
 -- name: CreateProduct :one
 INSERT INTO product
-(id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops)
-VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, name, calories, protein, fiber, price, weight, categories, shops;
+(id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops, user_id)
+VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id;

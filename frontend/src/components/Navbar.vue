@@ -35,7 +35,7 @@ async function logout() {
       <CCollapse class="navbar-collapse">
         <CNavbarNav class="w-100">
           <CNavItem>
-            <RouterLink v-if="userStorage.id" class="nav-link" to="/" active-class="active"
+            <RouterLink class="nav-link" to="/" active-class="active"
               >Home</RouterLink
             >
           </CNavItem>
