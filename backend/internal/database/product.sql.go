@@ -16,7 +16,7 @@ const createProduct = `-- name: CreateProduct :one
 INSERT INTO product
 (id, created_at, updated_at, name, calories, protein, fiber, price, weight, categories, shops, user_id)
 VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id
+    RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id
 `
 
 type CreateProductParams struct {
@@ -57,6 +57,53 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (C
 		arg.UserID,
 	)
 	var i CreateProductRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Calories,
+		&i.Protein,
+		&i.Fiber,
+		&i.Price,
+		&i.Weight,
+		pq.Array(&i.Categories),
+		pq.Array(&i.Shops),
+		&i.UserID,
+	)
+	return i, err
+}
+
+const deleteProduct = `-- name: DeleteProduct :exec
+DELETE FROM product
+WHERE id=$1
+`
+
+func (q *Queries) DeleteProduct(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteProduct, id)
+	return err
+}
+
+const getProduct = `-- name: GetProduct :one
+SELECT id, name, calories, protein, fiber, price, weight, categories, shops, user_id
+FROM product
+WHERE id=$1
+`
+
+type GetProductRow struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Calories   float64   `json:"calories"`
+	Protein    float64   `json:"protein"`
+	Fiber      float64   `json:"fiber"`
+	Price      float64   `json:"price"`
+	Weight     float64   `json:"weight"`
+	Categories []string  `json:"categories"`
+	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"userId"`
+}
+
+func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (GetProductRow, error) {
+	row := q.db.QueryRowContext(ctx, getProduct, id)
+	var i GetProductRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,

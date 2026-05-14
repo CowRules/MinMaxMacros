@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/CowRules/MinMaxMacros/backend/internal/auth"
 	"github.com/CowRules/MinMaxMacros/backend/internal/database"
+	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -36,26 +39,6 @@ func (cfg *apiConfig) GetProductCategories(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 	data, err := json.Marshal(categories)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	if _, err = w.Write(data); err != nil {
-		fmt.Println(err)
-		return
-	}
-}
-
-func (cfg *apiConfig) GetProductShops(w http.ResponseWriter, r *http.Request) {
-	shops, err := cfg.dbQueries.GetProductShops(r.Context())
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	data, err := json.Marshal(shops)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -102,6 +85,60 @@ func (cfg *apiConfig) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	if _, err := w.Write(data); err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func (cfg *apiConfig) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	authenticated, userId, _ := auth.IsAuthenticated(r)
+	if !authenticated {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	productId, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "invalid product id", http.StatusBadRequest)
+		return
+	}
+	product, err := cfg.dbQueries.GetProduct(r.Context(), productId)
+	if errors.Is(err, sql.ErrNoRows) {
+		http.Error(w, "product does not exist", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	if userId != product.UserID {
+		http.Error(w, "unauthorized", http.StatusForbidden)
+		return
+	}
+	if err := cfg.dbQueries.DeleteProduct(r.Context(), productId); err != nil {
+		fmt.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (cfg *apiConfig) GetProductShops(w http.ResponseWriter, r *http.Request) {
+	shops, err := cfg.dbQueries.GetProductShops(r.Context())
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(shops)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err = w.Write(data); err != nil {
 		fmt.Println(err)
 		return
 	}

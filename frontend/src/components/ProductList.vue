@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProductItem } from '@/types.ts'
 import {
+  CButton,
   CTable,
   CTableBody,
   CTableDataCell,
@@ -10,6 +11,7 @@ import {
 } from '@coreui/vue'
 import DropdownList from '@/components/DropdownList.vue'
 import TableHeaderCellSort from '@/components/TableHeaderCellSort.vue'
+import { userStorage } from '@/composables/useUserStorage.ts'
 
 const props = defineProps<{
   products: ProductItem[]
@@ -18,6 +20,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   handleSort: [criteria: string, direction: string]
+  handleDelete: [product: ProductItem]
 }>()
 
 function handleSort(criteria: string) {
@@ -82,6 +85,7 @@ function handleSort(criteria: string) {
         />
         <CTableHeaderCell scope="col">Shops</CTableHeaderCell>
         <CTableHeaderCell scope="col">Categories</CTableHeaderCell>
+        <CTableHeaderCell v-if="userStorage.id" scope="col">Actions</CTableHeaderCell>
       </CTableRow>
     </CTableHead>
     <CTableBody class="table-group-divider">
@@ -104,6 +108,13 @@ function handleSort(criteria: string) {
         </CTableDataCell>
         <CTableDataCell>
           <DropdownList :items="product.categories" />
+        </CTableDataCell>
+        <CTableDataCell v-if="userStorage.id" class="align-content-center">
+          <div v-if="userStorage.id === product.userId" class="d-flex gap-2 justify-content-center">
+            <CButton variant="danger" @click="emit('handleDelete', product)"
+              ><span class="pi pi-trash"
+            /></CButton>
+          </div>
         </CTableDataCell>
       </CTableRow>
     </CTableBody>

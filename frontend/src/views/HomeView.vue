@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { type ProductItem } from '@/types.ts'
 import ProductList from '@/components/ProductList.vue'
 import {
+  CAlert,
   CButton,
   CContainer,
   CFormInput,
@@ -17,6 +18,8 @@ import DropdownFilter from '@/components/DropdownFilter.vue'
 import { userStorage } from '@/composables/useUserStorage.ts'
 
 const loaded = ref(false)
+
+const errorMessage = ref('')
 
 const fullListing = ref<ProductItem[]>([])
 
@@ -115,6 +118,17 @@ async function handleNewProduct(newProduct: ProductItem) {
     existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, newProduct.shops)
   })
 }
+
+async function handleDelete(product: ProductItem) {
+  try {
+    const res = await api.delete('/api/products/' + product.id)
+    if (res.status == 204) {
+      fullListing.value = fullListing.value.filter((item: ProductItem) => item.id !== product.id)
+    }
+  } catch (e) {
+    errorMessage.value = 'Error while deleting product. Try again later.'
+  }
+}
 </script>
 
 <template>
@@ -127,6 +141,10 @@ async function handleNewProduct(newProduct: ProductItem) {
       @add-product="handleNewProduct"
     />
     <h1>Welcome to MinMax Macros</h1>
+
+    <CAlert v-if="errorMessage" color="danger" dismissible @close="errorMessage = ''">{{
+      errorMessage
+    }}</CAlert>
 
     <div
       class="d-flex mt-5 mb-2"
@@ -171,6 +189,7 @@ async function handleNewProduct(newProduct: ProductItem) {
       :sorted-by
       :sort-direction
       @handle-sort="handleSort"
+      @handle-delete="handleDelete"
     />
   </CContainer>
   <CContainer class="flex-grow-1 align-content-center" v-else>

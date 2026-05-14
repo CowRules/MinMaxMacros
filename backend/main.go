@@ -56,6 +56,8 @@ func main() {
 
 	serveMux.HandleFunc("POST /api/products", apiCfg.CreateProduct)
 
+	serveMux.HandleFunc("DELETE /api/products/{id}", apiCfg.DeleteProduct)
+
 	serveMux.HandleFunc("POST /auth/register", apiCfg.Register)
 
 	serveMux.HandleFunc("POST /auth/login", apiCfg.Login)
