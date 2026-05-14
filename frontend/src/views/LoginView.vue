@@ -60,7 +60,7 @@ async function handleLogin() {
         type="email"
         id="email"
         label="Email"
-        v-model="v$.email.$model"
+        v-model="loginDetails.email"
         :invalid="v$.email.$error"
         :feedback-invalid="
           v$.email.$errors.length > 0 ? v$.email.$errors[0]!.$message.toString() : undefined
@@ -69,7 +69,7 @@ async function handleLogin() {
       <PasswordInput
         class="mb-2"
         label="Password"
-        v-model="v$.password.$model"
+        v-model="loginDetails.password"
         :invalid="v$.password.$error"
         :feedback-invalid="
           v$.password.$errors.length > 0 ? v$.password.$errors[0]!.$message.toString() : undefined

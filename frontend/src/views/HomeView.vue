@@ -16,6 +16,7 @@ import api from '@/api/api.ts'
 import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
 import DropdownFilter from '@/components/DropdownFilter.vue'
 import { userStorage } from '@/composables/useUserStorage.ts'
+import DeleteConfirmModal from '@/components/DeleteConfirmModal.vue'
 
 const loaded = ref(false)
 
@@ -70,6 +71,7 @@ const selectedProduct = ref<ProductItem>()
 
 const visibleCreateModal = ref<boolean>(false)
 const visibleUpdateModal = ref<boolean>(false)
+const visibleDeleteModal = ref<boolean>(false)
 
 const searchInput = ref<string>('')
 
@@ -138,11 +140,11 @@ async function handleUpdateProduct(updatedProduct: ProductItem) {
   }
 }
 
-async function handleDelete(product: ProductItem) {
+async function handleDelete(productId: string) {
   try {
-    const res = await api.delete('/api/products/' + product.id)
+    const res = await api.delete('/api/products/' + productId)
     if (res.status == 204) {
-      fullListing.value = fullListing.value.filter((item: ProductItem) => item.id !== product.id)
+      fullListing.value = fullListing.value.filter((item: ProductItem) => item.id !== productId)
     }
   } catch (e) {
     errorMessage.value = 'Error while deleting product. Try again later.'
@@ -179,6 +181,18 @@ async function handleDelete(product: ProductItem) {
       @submit="handleUpdateProduct"
       submit-text="Update"
       header-text="Edit product"
+    />
+    <DeleteConfirmModal
+      :id="selectedProduct?.id ?? ''"
+      :visible="visibleDeleteModal"
+      :header-text="'Are you sure you want to delete ' + selectedProduct?.name + '?'"
+      @close="
+        () => {
+          visibleDeleteModal = false
+          selectedProduct = undefined
+        }
+      "
+      @delete="handleDelete"
     />
     <h1>Welcome to MinMax Macros</h1>
 
@@ -229,7 +243,12 @@ async function handleDelete(product: ProductItem) {
       :sorted-by
       :sort-direction
       @handle-sort="handleSort"
-      @handle-delete="handleDelete"
+      @handle-delete="
+        (product: ProductItem) => {
+          selectedProduct = product
+          visibleDeleteModal = true
+        }
+      "
       @handle-edit="
         (product: ProductItem) => {
           visibleUpdateModal = true

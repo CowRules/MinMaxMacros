@@ -13,7 +13,7 @@ const show = ref<boolean>(false)
 
 <template>
   <div :class="props.class">
-    <CFormLabel v-if="props.label">Password</CFormLabel>
+    <CFormLabel v-if="props.label">{{ props.label }}</CFormLabel>
     <CInputGroup class="mb-2">
       <CInputGroupText style="cursor: pointer" @click="() => (show = !show)"
         ><span

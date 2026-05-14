@@ -58,7 +58,7 @@ async function handleRegister() {
         type="text"
         id="username"
         label="Username"
-        v-model="v$.username.$model"
+        v-model="user.username"
         :invalid="v$.username.$error"
         :feedback-invalid="
           v$.username.$errors.length > 0 ? v$.username.$errors[0]!.$message.toString() : ''
@@ -69,7 +69,7 @@ async function handleRegister() {
         type="email"
         id="email"
         label="Email"
-        v-model="v$.email.$model"
+        v-model="user.email"
         :invalid="v$.email.$error"
         :feedback-invalid="
           v$.email.$errors.length > 0 ? v$.email.$errors[0]!.$message.toString() : ''
@@ -78,7 +78,7 @@ async function handleRegister() {
       <PasswordInput
         class="mb-2"
         label="Password"
-        v-model="v$.password.$model"
+        v-model="user.password"
         :invalid="v$.password.$error"
         :feedback-invalid="
           v$.password.$errors.length > 0 ? v$.password.$errors[0]!.$message.toString() : ''
@@ -87,7 +87,7 @@ async function handleRegister() {
       <PasswordInput
         class="mb-2"
         label="Confirm Password"
-        v-model="v$.confirmPassword.$model"
+        v-model="user.confirmPassword"
         :invalid="v$.confirmPassword.$error"
         :feedback-invalid="v$.confirmPassword.$error ? 'Passwords do not match' : ''"
       />
