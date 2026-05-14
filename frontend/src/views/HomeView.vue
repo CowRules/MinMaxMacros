@@ -11,7 +11,7 @@ import {
   CInputGroupText,
   CSpinner,
 } from '@coreui/vue'
-import CreateProductModal from '@/components/CreateProductModal.vue'
+import ProductFormModal from '@/components/ProductFormModal.vue'
 import api from '@/api/api.ts'
 import { mergeUniqueSortedStringArrays } from '@/utils/arrayUtils.ts'
 import DropdownFilter from '@/components/DropdownFilter.vue'
@@ -65,7 +65,11 @@ const filteredListing = computed(() => {
     )
   })
 })
-const visibleModal = ref<boolean>(false)
+
+const selectedProduct = ref<ProductItem>()
+
+const visibleCreateModal = ref<boolean>(false)
+const visibleUpdateModal = ref<boolean>(false)
 
 const searchInput = ref<string>('')
 
@@ -104,19 +108,34 @@ async function handleSort(criteria: string, direction: string) {
   }
 }
 
-function handleClose(): void {
-  visibleModal.value = false
-}
-
 async function handleNewProduct(newProduct: ProductItem) {
-  await api.post('/api/products', newProduct).then((res) => {
-    fullListing.value.push(res.data)
-    existingCategories.value = mergeUniqueSortedStringArrays(
-      existingCategories.value,
-      newProduct.categories,
-    )
-    existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, newProduct.shops)
-  })
+  try {
+    await api.post('/api/products', newProduct).then((res) => {
+      fullListing.value.push(res.data)
+      existingCategories.value = mergeUniqueSortedStringArrays(
+        existingCategories.value,
+        newProduct.categories,
+      )
+      existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, newProduct.shops)
+    })
+  } catch (e) {
+    errorMessage.value = 'Error creating product. Try again later.'
+  }
+}
+async function handleUpdateProduct(updatedProduct: ProductItem) {
+  try {
+    await api.put('/api/products/' + updatedProduct.id, updatedProduct).then((res) => {
+      const idx = fullListing.value.findIndex((item: ProductItem) => item.id === updatedProduct.id)
+      fullListing.value[idx] = updatedProduct
+      existingCategories.value = mergeUniqueSortedStringArrays(
+        existingCategories.value,
+        updatedProduct.categories,
+      )
+      existingShops.value = mergeUniqueSortedStringArrays(existingShops.value, updatedProduct.shops)
+    })
+  } catch (e) {
+    errorMessage.value = 'Error updating product. Try again later.'
+  }
 }
 
 async function handleDelete(product: ProductItem) {
@@ -133,12 +152,33 @@ async function handleDelete(product: ProductItem) {
 
 <template>
   <CContainer v-if="loaded" class="px-lg-5">
-    <CreateProductModal
-      :visible="visibleModal"
+    <ProductFormModal
+      :visible="visibleCreateModal"
       :shops="existingShops"
       :categories="existingCategories"
-      @close="handleClose"
-      @add-product="handleNewProduct"
+      @close="
+        () => {
+          visibleCreateModal = false
+        }
+      "
+      @submit="handleNewProduct"
+      submit-text="Add"
+      header-text="Add new product"
+    />
+    <ProductFormModal
+      :visible="visibleUpdateModal"
+      :shops="existingShops"
+      :categories="existingCategories"
+      :product="selectedProduct"
+      @close="
+        () => {
+          visibleUpdateModal = false
+          selectedProduct = undefined
+        }
+      "
+      @submit="handleUpdateProduct"
+      submit-text="Update"
+      header-text="Edit product"
     />
     <h1>Welcome to MinMax Macros</h1>
 
@@ -175,7 +215,7 @@ async function handleDelete(product: ProductItem) {
         class="mx-3"
         @click="
           () => {
-            visibleModal = true
+            visibleCreateModal = true
           }
         "
       >
@@ -190,6 +230,12 @@ async function handleDelete(product: ProductItem) {
       :sort-direction
       @handle-sort="handleSort"
       @handle-delete="handleDelete"
+      @handle-edit="
+        (product: ProductItem) => {
+          visibleUpdateModal = true
+          selectedProduct = product
+        }
+      "
     />
   </CContainer>
   <CContainer class="flex-grow-1 align-content-center" v-else>

@@ -29,13 +29,7 @@ const props = defineProps<{
         <CButton color="link" class="p-0" size="sm" @click="model = []">Clear filters</CButton>
       </CDropdownHeader>
       <CDropdownItem class="py-0 px-1" v-for="option in filterOptions" :key="option + '_filter'">
-        <CFormCheck
-          hit-area="full"
-          :id="option"
-          :value="option"
-          :label="option"
-          v-model="model"
-        />
+        <CFormCheck hit-area="full" :id="option" :value="option" :label="option" v-model="model" />
       </CDropdownItem>
     </CDropdownMenu>
   </CDropdown>

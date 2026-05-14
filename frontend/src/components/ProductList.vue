@@ -21,6 +21,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   handleSort: [criteria: string, direction: string]
   handleDelete: [product: ProductItem]
+  handleEdit: [product: ProductItem]
 }>()
 
 function handleSort(criteria: string) {
@@ -111,6 +112,9 @@ function handleSort(criteria: string) {
         </CTableDataCell>
         <CTableDataCell v-if="userStorage.id" class="align-content-center">
           <div v-if="userStorage.id === product.userId" class="d-flex gap-2 justify-content-center">
+            <CButton variant="info" @click="emit('handleEdit', product)"
+              ><span class="pi pi-pen-to-square"
+            /></CButton>
             <CButton variant="danger" @click="emit('handleDelete', product)"
               ><span class="pi pi-trash"
             /></CButton>

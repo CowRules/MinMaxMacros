@@ -230,3 +230,63 @@ func (q *Queries) GetProducts(ctx context.Context) ([]GetProductsRow, error) {
 	}
 	return items, nil
 }
+
+const updateProduct = `-- name: UpdateProduct :one
+UPDATE product
+SET updated_at=NOW(), name=$2, calories=$3, protein=$4, fiber=$5, price=$6, weight=$7, categories=$8, shops=$9
+WHERE id=$1
+RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id
+`
+
+type UpdateProductParams struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Calories   float64   `json:"calories"`
+	Protein    float64   `json:"protein"`
+	Fiber      float64   `json:"fiber"`
+	Price      float64   `json:"price"`
+	Weight     float64   `json:"weight"`
+	Categories []string  `json:"categories"`
+	Shops      []string  `json:"shops"`
+}
+
+type UpdateProductRow struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Calories   float64   `json:"calories"`
+	Protein    float64   `json:"protein"`
+	Fiber      float64   `json:"fiber"`
+	Price      float64   `json:"price"`
+	Weight     float64   `json:"weight"`
+	Categories []string  `json:"categories"`
+	Shops      []string  `json:"shops"`
+	UserID     uuid.UUID `json:"userId"`
+}
+
+func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (UpdateProductRow, error) {
+	row := q.db.QueryRowContext(ctx, updateProduct,
+		arg.ID,
+		arg.Name,
+		arg.Calories,
+		arg.Protein,
+		arg.Fiber,
+		arg.Price,
+		arg.Weight,
+		pq.Array(arg.Categories),
+		pq.Array(arg.Shops),
+	)
+	var i UpdateProductRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Calories,
+		&i.Protein,
+		&i.Fiber,
+		&i.Price,
+		&i.Weight,
+		pq.Array(&i.Categories),
+		pq.Array(&i.Shops),
+		&i.UserID,
+	)
+	return i, err
+}

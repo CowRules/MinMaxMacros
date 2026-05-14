@@ -18,11 +18,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response.status === 401) {
       try {
-        const res = await axios.post(
-          `${baseURL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        )
+        const res = await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true })
         if (res.status === 200) {
           return api(error.config)
         }

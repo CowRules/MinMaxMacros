@@ -7,7 +7,7 @@ import (
 	"github.com/CowRules/MinMaxMacros/backend/internal/database"
 )
 
-func ValidateCreateProduct(body database.CreateProductParams) error {
+func ValidateProduct(body database.Product) error {
 	if body.Name == "" {
 		return errors.New("missing product name")
 	}

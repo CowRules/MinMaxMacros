@@ -15,6 +15,12 @@ INSERT INTO product
 VALUES (gen_random_uuid(), NOW(), NOW(), $1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id;
 
+-- name: UpdateProduct :one
+UPDATE product
+SET updated_at=NOW(), name=$2, calories=$3, protein=$4, fiber=$5, price=$6, weight=$7, categories=$8, shops=$9
+WHERE id=$1
+RETURNING id, name, calories, protein, fiber, price, weight, categories, shops, user_id;
+
 -- name: DeleteProduct :exec
 DELETE FROM product
 WHERE id=$1;
