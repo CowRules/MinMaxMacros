@@ -28,7 +28,7 @@ type CreateProductParams struct {
 	Weight     float64   `json:"weight"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
-	UserID     uuid.UUID `json:"user_id"`
+	UserID     uuid.UUID `json:"userId"`
 }
 
 type CreateProductRow struct {
@@ -41,7 +41,7 @@ type CreateProductRow struct {
 	Weight     float64   `json:"weight"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
-	UserID     uuid.UUID `json:"user_id"`
+	UserID     uuid.UUID `json:"userId"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (CreateProductRow, error) {
@@ -147,7 +147,7 @@ type GetProductsRow struct {
 	Weight     float64   `json:"weight"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
-	UserID     uuid.UUID `json:"user_id"`
+	UserID     uuid.UUID `json:"userId"`
 }
 
 func (q *Queries) GetProducts(ctx context.Context) ([]GetProductsRow, error) {

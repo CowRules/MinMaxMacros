@@ -13,8 +13,8 @@ import (
 
 type Product struct {
 	ID         uuid.UUID `json:"id"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 	Name       string    `json:"name"`
 	Price      float64   `json:"price"`
 	Weight     float64   `json:"weight"`
@@ -23,22 +23,22 @@ type Product struct {
 	Fiber      float64   `json:"fiber"`
 	Categories []string  `json:"categories"`
 	Shops      []string  `json:"shops"`
-	UserID     uuid.UUID `json:"user_id"`
+	UserID     uuid.UUID `json:"userId"`
 }
 
 type RefreshToken struct {
 	Token     string       `json:"token"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
-	UserID    uuid.UUID    `json:"user_id"`
-	ExpiresAt time.Time    `json:"expires_at"`
-	RevokedAt sql.NullTime `json:"revoked_at"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
+	UserID    uuid.UUID    `json:"userId"`
+	ExpiresAt time.Time    `json:"expiresAt"`
+	RevokedAt sql.NullTime `json:"revokedAt"`
 }
 
 type User struct {
 	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`

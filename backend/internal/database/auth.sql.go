@@ -20,8 +20,8 @@ VALUES ($1, NOW(), NOW(), $2, $3)
 
 type CreateRefreshTokenParams struct {
 	Token     string    `json:"token"`
-	UserID    uuid.UUID `json:"user_id"`
-	ExpiresAt time.Time `json:"expires_at"`
+	UserID    uuid.UUID `json:"userId"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error {
