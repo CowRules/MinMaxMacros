@@ -3,9 +3,9 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"os"
 
-	"fmt"
 	"net/http"
 
 	"github.com/CowRules/MinMaxMacros/backend/internal/database"
@@ -20,26 +20,26 @@ type apiConfig struct {
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Printf("Error loading .env file: %v\n", err)
+		log.Fatalf("Error loading .env file: %v\n", err)
 		return
 	}
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
-		fmt.Println("DB_URL environment variable not set")
+		log.Fatal("DB_URL environment variable not set")
 		return
 	}
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		fmt.Printf("Error connecting to database: %v\n", err)
+		log.Fatalf("Error connecting to database: %v\n", err)
 		return
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			fmt.Printf("Error closing database connection: %v\n", err)
+			log.Fatalf("Error closing database connection: %v\n", err)
 		}
 	}()
 	if err := db.Ping(); err != nil {
-		fmt.Printf("Error pinging database connection: %v\n", err)
+		log.Fatalf("Error pinging database connection: %v\n", err)
 		return
 	}
 	dbQueries := database.New(db)
@@ -71,11 +71,11 @@ func main() {
 		Handler: corsMiddleware(serveMux),
 	}
 
-	fmt.Println("Server starting on port 8080")
+	log.Println("Server starting on port 8080")
 
 	if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("Error starting server: %v\n", err)
+		log.Fatalf("Error starting server: %v\n", err)
 	} else {
-		fmt.Println("Server stopped")
+		log.Println("Server stopped")
 	}
 }

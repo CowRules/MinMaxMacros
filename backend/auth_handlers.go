@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -17,12 +18,12 @@ func (cfg *apiConfig) Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	requestBody := database.CreateUserParams{}
 	if err := decoder.Decode(&requestBody); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 	if err := ValidateRegister(requestBody); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, fmt.Sprintf("invalid request body: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
@@ -35,13 +36,13 @@ func (cfg *apiConfig) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	hashedPassword, err := auth.HashPassword(requestBody.Password)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	requestBody.Password = hashedPassword
 	if err := cfg.dbQueries.CreateUser(r.Context(), requestBody); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -56,24 +57,24 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}{}
 	if err := decoder.Decode(&requestBody); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 	user, err := cfg.dbQueries.GetUserByEmail(r.Context(), requestBody.Email)
 	if errors.Is(err, sql.ErrNoRows) {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "incorrect email or password", http.StatusUnauthorized)
 		return
 	}
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	isPasswordCorrect, err := auth.CheckPasswordHash(requestBody.Password, user.Password)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -83,14 +84,14 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := auth.MakeJWT(user.ID, user.Role)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	refreshToken := auth.MakeRefreshToken()
 	err = cfg.dbQueries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{Token: refreshToken, UserID: user.ID, ExpiresAt: time.Now().Add(time.Hour * 24).UTC()})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -114,13 +115,13 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 		Role     string    `json:"role"`
 	}{ID: user.ID, Username: user.Username, Role: user.Role})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if _, err = w.Write(data); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 }
@@ -128,14 +129,14 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 func (cfg *apiConfig) Refresh(w http.ResponseWriter, r *http.Request) {
 	refreshTokenCookie, err := r.Cookie("RefreshToken")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		cfg.Logout(w, r)
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 	refreshToken, err := cfg.dbQueries.GetRefreshToken(r.Context(), refreshTokenCookie.Value)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		cfg.Logout(w, r)
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -147,14 +148,14 @@ func (cfg *apiConfig) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := cfg.dbQueries.GetUserById(r.Context(), refreshToken.UserID)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		cfg.Logout(w, r)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	accessToken, err := auth.MakeJWT(user.ID, user.Role)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		cfg.Logout(w, r)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
